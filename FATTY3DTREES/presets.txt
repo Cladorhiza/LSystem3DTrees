@@ -1,0 +1,30 @@
+cool tree
+	
+std::string axiom = "B";
+std::string rules = "A-AA,B-ACEBDFB,C-C,D-D,E-E,F-F";
+std::string turtleRules = "A-F 0.001,B-F 0.0005,C-[,D-],E-+ 45,F-- 45";
+	
+cool 3d tree
+
+std::string axiom = "B";
+std::string rules = "A-AA,B-ACEBDCFBDCGBDHB,C-C,D-D,E-E,F-F,G-G,H-H";
+std::string turtleRules = "A-F 0.1,B-F 0.05,C-[,D-],E-+ 45,F-- 45,G-& 45,H-^ 45";
+
+
+DRAGON BREATH
+	
+std::string axiom = "F";
+std::string rules = "F-FAG,G-FBG,A-A,B-B";
+std::string turtleRules = "F-F 0.025,G-F 0.025,A-- 90, B-+ 90";
+	
+Realistic tree
+	
+std::string axiom = "X";
+std::string rules = "X-FACCXDBXDBFCBFXDAX),F-FF,A-A,B-B,C-C,D-D";
+std::string turtleRules = "F-F 0.025,A-+ 25, B-- 25,C-[,D-]";
+
+with skew
+
+std::string axiom = "X";
+std::string rules = "X-FAECCXDBGXDBGFCBGFXDAEX),F-FF,A-A,B-B,C-C,D-D,E-E,G-G";
+std::string turtleRules = "F-F 0.025,A-+ 25, B-- 25,C-[,D-],E-& 25,G-^ 25";

@@ -1,0 +1,32 @@
+#shader vertex
+#version 330 core
+layout(location = 0) in vec3 in_Position;
+layout(location = 1) in vec4 in_Color;
+
+out vec4 ex_Color;
+
+uniform mat4 projectionMatrix;
+uniform mat4 viewMatrix;
+
+
+
+void main()
+{
+	vec3 lightPosition = vec3(100.f, 100.f, 0.f);
+	
+
+	gl_Position = projectionMatrix * viewMatrix * vec4(in_Position, 1.0);
+	ex_Color = vec4(normalize(in_Position), 1.f);
+
+};
+
+#shader fragment
+#version 330 core
+
+in vec4 ex_Color;
+out vec4 out_Color;
+
+void main()
+{
+	out_Color = ex_Color;
+};

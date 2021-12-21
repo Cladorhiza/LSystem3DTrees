@@ -1,0 +1,11 @@
+F Move forward a step of length d.
+f Move forward a step of length d without drawing a line.
++ Turn left by angle δ, using rotation matrix RU(δ).
+− Turn right by angle δ, using rotation matrix RU(−δ).
+& Pitch down by angle δ, using rotation matrix RL(δ).
+∧ Pitch up by angle δ, using rotation matrix RL(−δ).
+\ Roll left by angle δ, using rotation matrix RH(δ).
+/ Roll right by angle δ, using rotation matrix RH(−δ).
+| Turn around, using rotation matrix RU(180◦).
+[ push matrix
+] pop matrix
