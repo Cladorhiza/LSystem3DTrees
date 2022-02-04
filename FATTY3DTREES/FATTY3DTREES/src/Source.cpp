@@ -9,11 +9,14 @@
 #include "LSystem.h"
 #include "GraphicsTurtle.h"
 #include "Camera.h"
+#include "ResourceManager.h"
 
 #include <iostream>
 #include <vector>
 #include <utility>
 #include <sstream>
+
+
 
 int main()
 {
@@ -43,21 +46,32 @@ int main()
 
     glViewport(0, 0, 1280, 720);
     glClearColor(0.f, 0.0f, 0.0f, 1.f);
-    
-    glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.f), 16.f/9.f, 0.f, 100.f);
+
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.f), 16.f / 9.f, 0.f, 100.f);
     glm::mat4 viewMatrix = Camera::GetViewMatrix();
     
+    float red[4]{0.8f,0.f,0.f,1.f};
+    float blue[4]{0.f,0.f,0.8f,1.f};
+    float green[4]{0.f,0.8f,0.f,1.f};
+    float yellow[4]{0.8f,0.8f,0.f,1.f};
+
     std::string axiom = "B";
     std::string rules = "A-AA,B-ACEBDCFBDCGBDHB,C-C,D-D,E-E,F-F,G-G,H-H";
     std::string turtleRules = "A-F 0.1,B-F 0.05,C-[,D-],E-+ 45,F-- 45,G-& 45,H-^ 45";
-    int generation = 3;
-
+    int generation = 1;
+        
     std::string rulesAtGeneration = LSystem::CalculateLSystemAtGeneration(axiom, rules, generation);
-
+        
     GraphicsTurtle turtle;
     turtle.BuildLSystemToTurtleMappings(turtleRules);
-    unsigned vao3 = turtle.GenerateGeometryOfLSystemRuleString(rulesAtGeneration);
+    GraphicsTurtle::renderData data = turtle.GenerateGeometryOfLSystemRuleString(rulesAtGeneration);
+    unsigned vao = GLUtil::buildVAOfromData(data);
+    ResourceManager::AddBuffer(vao);
+
     
+
+    std::vector<unsigned int> circleVaos;
+
     Shader shader("res/shaders/BasicShader.txt");
     shader.Bind();
     /* Loop until the user closes the window */
@@ -65,27 +79,86 @@ int main()
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
-        
-        if (InputManager::GetKeyToggle(GLFW_KEY_W)) {
-            generation++;
-            rulesAtGeneration = LSystem::CalculateLSystemAtGeneration(axiom, rules, generation);
-            turtle.Reset();
-            vao3 = turtle.GenerateGeometryOfLSystemRuleString(rulesAtGeneration);
-        }
-        
-        if (InputManager::GetKeyToggle(GLFW_KEY_S)) {
-            if (generation > 0) generation--;
-            rulesAtGeneration = LSystem::CalculateLSystemAtGeneration(axiom, rules, generation);
-            turtle.Reset();
-            vao3 = turtle.GenerateGeometryOfLSystemRuleString(rulesAtGeneration);
-        }
+
         Camera::Update();
         viewMatrix = Camera::GetViewMatrix();
         shader.SetUniformMat4f("projectionMatrix", projectionMatrix);
         shader.SetUniformMat4f("viewMatrix", viewMatrix);
 
-        glBindVertexArray(vao3);
+
+
+
+
+        if (InputManager::GetKeyToggle(GLFW_KEY_W)) {
+            generation++;
+            rulesAtGeneration = LSystem::CalculateLSystemAtGeneration(axiom, rules, generation);
+            turtle.Reset();
+            GraphicsTurtle::renderData t = turtle.GenerateGeometryOfLSystemRuleString(rulesAtGeneration);
+            ResourceManager::RemoveBuffer(vao);
+            vao = GLUtil::buildVAOfromData(t);
+            ResourceManager::AddBuffer(vao);
+            std::cout << t.vertexes.size() << std::endl;
+            
+            for (const unsigned int v : circleVaos) {
+                ResourceManager::RemoveBuffer(v);
+            }
+            circleVaos.clear();
+
+            for (const GraphicsTurtle::vertex& p : t.vertexes)
+            {
+                float radiusRatio = (t.maximumDistanceFromOrigin - p.distanceFromOrigin) / t.maximumDistanceFromOrigin;
+                if (radiusRatio == 0.0f) 
+                    radiusRatio = 0.0001f;
+                float radius = 0.1f * radiusRatio;
+                unsigned int v = GLUtil::buildCircleVAO(p.position, p.circleNormal, radius, 10, green);
+                ResourceManager::AddBuffer(v);
+                circleVaos.push_back(v);
+            }
+        }
+            
+        if (InputManager::GetKeyToggle(GLFW_KEY_S)) {
+            if (generation > 0) generation--;
+            rulesAtGeneration = LSystem::CalculateLSystemAtGeneration(axiom, rules, generation);
+            turtle.Reset();
+            GraphicsTurtle::renderData t = turtle.GenerateGeometryOfLSystemRuleString(rulesAtGeneration);
+            ResourceManager::RemoveBuffer(vao);
+            vao = GLUtil::buildVAOfromData(t);
+            ResourceManager::AddBuffer(vao);
+
+            for (const unsigned int v : circleVaos) {
+                ResourceManager::RemoveBuffer(v);
+            }
+            circleVaos.clear();
+
+            for (const GraphicsTurtle::vertex& p : t.vertexes)
+            {
+                float radiusRatio = (t.maximumDistanceFromOrigin - p.distanceFromOrigin) / t.maximumDistanceFromOrigin;
+                if (radiusRatio == 0.0f) 
+                    radiusRatio = 0.0001f;
+                float radius = 0.1f * radiusRatio;
+                unsigned int v = GLUtil::buildCircleVAO(p.position, p.circleNormal, radius, 10, green);
+                ResourceManager::AddBuffer(v);
+                circleVaos.push_back(v);
+            }
+
+        }
+
+        if (InputManager::GetKeyState(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+            ResourceManager::Clear();
+            break;
+        }
+
+        glBindVertexArray(vao);
         glDrawElements(GL_LINES, 10000000, GL_UNSIGNED_INT, 0);
+
+        for (unsigned vao : circleVaos) {
+            glBindVertexArray(vao);
+            glDrawElements(GL_LINES, 20, GL_UNSIGNED_INT, 0);
+        }
+
+
+
+
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
@@ -93,6 +166,6 @@ int main()
         /* Poll for and process events */
         InputManager::Poll(window);
     }
-
+    
     glfwTerminate();
 }

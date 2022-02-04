@@ -1,7 +1,8 @@
 #include "GraphicsTurtle.h"
+#include <iostream>
 
 GraphicsTurtle::GraphicsTurtle()
-	:currentTransformation(1.f)
+	:currentTransformation(1.f),distanceFromOrigin(0.f)
 	{
 	}
 
@@ -19,11 +20,15 @@ GraphicsTurtle::GraphicsTurtle()
 	}
 	void GraphicsTurtle::PushMatrix() {
 		matrixStack.push_back(currentTransformation);
+		distanceFromOriginStack.push_back(distanceFromOrigin);
 	}
 	void GraphicsTurtle::PopMatrix() {
-		//might break
-		currentTransformation = matrixStack.back();
-		matrixStack.pop_back();
+		if (matrixStack.size() > 0 && distanceFromOriginStack.size() > 0) {
+			currentTransformation = matrixStack.back();
+			matrixStack.pop_back();
+			distanceFromOrigin = distanceFromOriginStack.back();
+			distanceFromOriginStack.pop_back();
+		}
 	}
 
 	void GraphicsTurtle::BuildLSystemToTurtleMappings(std::string turtleRules) {
@@ -31,7 +36,6 @@ GraphicsTurtle::GraphicsTurtle()
         std::stringstream ruleStream(turtleRules);
         std::string turtleRuleString;
 
-        
         while (std::getline(ruleStream, turtleRuleString, ',')) {
             std::stringstream subRule(turtleRuleString);
 			
@@ -66,24 +70,31 @@ GraphicsTurtle::GraphicsTurtle()
         }
 	}
 
-	unsigned GraphicsTurtle::GenerateGeometryOfLSystemRuleString(std::string rules) {
+	GraphicsTurtle::renderData GraphicsTurtle::GenerateGeometryOfLSystemRuleString(std::string rules) {
 
 		//OpenGL geometry
-		std::vector<float> vertexes;
-		std::vector<float> colours;
-		std::vector<unsigned> indexes;
+
+		renderData lSystemRenderData;
+		lSystemRenderData.maximumDistanceFromOrigin = 0.f;
 
 		//push the origin on to first point before beginning traversal
-		std::vector<float> colour{ 1.f, 0.f, 0.f, 1.f };
-		glm::vec4 origin(0.f, 0.f, 0.f, 1.f);
-		vertexes.push_back(origin.x);
-		vertexes.push_back(origin.y);
-		vertexes.push_back(origin.y);
-		colours.insert(colours.end(), colour.begin(), colour.end());
-
+		vertex origin;
+		origin.position[0] = 0.f;
+		origin.position[1] = 0.f;
+		origin.position[2] = 0.f;
+		origin.colour[0] = 1.f;
+		origin.colour[1] = 0.f;
+		origin.colour[2] = 0.f;
+		origin.colour[3] = 1.f;
+		origin.distanceFromOrigin = distanceFromOrigin;
+		origin.circleNormal[0] = 0.f;
+		origin.circleNormal[1] = 1.f;
+		origin.circleNormal[2] = 0.f;
+		lSystemRenderData.vertexes.push_back(origin);
 		//tracks current index we are starting our move operation from
 		int indexCount = 0;
-		
+		glm::vec4 newPoint(0.f, 0.f, 0.f, 1.f);
+		glm::vec4 oldPoint(0.f, 0.f, 0.f, 1.f);
 		//parse every character from rule string into a turtle instruction
 		for (char c : rules) {
 			std::pair<char, float> turtleInstruction = LSystemToTurtleMappings[c];
@@ -126,20 +137,36 @@ GraphicsTurtle::GraphicsTurtle()
 				break;
 			}
 
-			//apply the new transformation to generate new geometry
-			glm::vec4 newPoint = currentTransformation * origin;
-			vertexes.push_back(newPoint.x);
-			vertexes.push_back(newPoint.y);
-			vertexes.push_back(newPoint.z);
+			//apply the new transformation to generate new vertex
+			vertex v;
+			oldPoint = newPoint;
+			newPoint = currentTransformation * glm::vec4(0.f, 0.f, 0.f, 1.f);
+			v.position[0] = newPoint.x;
+			v.position[1] = newPoint.y;
+			v.position[2] = newPoint.z;
+			v.colour[0] = 1.f;
+			v.colour[1] = 0.f;
+			v.colour[2] = 0.f;
+			v.colour[3] = 1.f;
+			if (turtleInstruction.first != ']' && turtleInstruction.first != '[') {
+				distanceFromOrigin += glm::length(newPoint - oldPoint);
+				if (distanceFromOrigin > lSystemRenderData.maximumDistanceFromOrigin)
+					lSystemRenderData.maximumDistanceFromOrigin = distanceFromOrigin;
+			}
+			v.distanceFromOrigin = distanceFromOrigin;
+			glm::vec4 circleNormal(glm::normalize(newPoint - oldPoint));
+			v.circleNormal[0] = circleNormal.x;
+			v.circleNormal[1] = circleNormal.y;
+			v.circleNormal[2] = circleNormal.z;
+			lSystemRenderData.vertexes.push_back(v);
 			indexCount++;
-			colours.insert(colours.end(), colour.begin(), colour.end());
 			//if it was a pop we don't want to connect old position to new position
 			if (turtleInstruction.first == ']') continue;
-			indexes.push_back(indexCount - 1);
-			indexes.push_back(indexCount);
+			lSystemRenderData.indexes.push_back(indexCount - 1);
+			lSystemRenderData.indexes.push_back(indexCount);
 		}
 
-		return GLUtil::buildVAOfromData(vertexes, colours, indexes);
+		return lSystemRenderData;
 	}
 
 	void GraphicsTurtle::Reset() {
@@ -147,7 +174,7 @@ GraphicsTurtle::GraphicsTurtle()
 		currentTransformation = glm::mat4(1.f);
 		std::vector<glm::mat4> m;
 		matrixStack = m;
-
+		distanceFromOrigin = 0.f;
 
 
 	}

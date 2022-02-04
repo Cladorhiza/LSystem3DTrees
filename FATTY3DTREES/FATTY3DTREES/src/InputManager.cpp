@@ -10,6 +10,7 @@ namespace InputManager{
 		GLFW_KEY_D,
 		GLFW_KEY_L,
 		GLFW_KEY_K,
+		GLFW_KEY_ESCAPE
 	};
 	//stored state of keys
 	std::unordered_map<int, int> keys;
@@ -31,7 +32,7 @@ namespace InputManager{
 		//updates glfw keys
 		glfwPollEvents();
 
-		//updates state of keys in my game
+		//updates state of keys
 		
 		for (int keyName : usedKeys) {
 			int state = glfwGetKey(window, keyName);

@@ -16,7 +16,7 @@ void main()
 	
 
 	gl_Position = projectionMatrix * viewMatrix * vec4(in_Position, 1.0);
-	ex_Color = vec4(normalize(in_Position), 1.f);
+	ex_Color = in_Color;
 
 };
 

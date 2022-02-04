@@ -1,4 +1,7 @@
 #include "GLUtil.h"
+#define _USE_MATH_DEFINES
+#include <math.h>
+#include "external_code/glm/gtx/rotate_vector.hpp"
 
 namespace GLUtil {
 
@@ -34,6 +37,65 @@ namespace GLUtil {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexes.size() * sizeof(unsigned), indexes.data(), GL_STATIC_DRAW);
 
         return vao;
+    }
+
+    unsigned buildVAOfromData(GraphicsTurtle::renderData& data) {
+
+        std::vector<float> vertexes;
+        std::vector<float> colours;
+
+        for (const GraphicsTurtle::vertex& v : data.vertexes) {
+
+            vertexes.push_back(v.position[0]);
+            vertexes.push_back(v.position[1]);
+            vertexes.push_back(v.position[2]);
+            colours.push_back(v.colour[0]);
+            colours.push_back(v.colour[1]);
+            colours.push_back(v.colour[2]);
+            colours.push_back(v.colour[3]);
+        }
+        return buildVAOfromData(vertexes, colours, data.indexes);
+    }
+
+    unsigned buildCircleVAO(const float position[3],const float normal[3], float radius, int resolution, const float colour[4]) {
+
+        std::vector<float> vertexes;
+        std::vector<float> colours;
+        std::vector<unsigned> indexes;
+
+        glm::vec3 originNormal(0.f, 1.f, 0.f);
+        glm::vec3 originSideNormal(1.f, 0.f, 0.f);
+
+        glm::vec3 circleNormal(glm::normalize(glm::vec3(normal[0], normal[1], normal[2])));
+        glm::vec3 circleSideNormal(glm::cross(originNormal, circleNormal));
+
+        if (glm::length(circleSideNormal) < 0.001f) 
+            circleSideNormal = originSideNormal;
+        circleSideNormal = glm::normalize(circleSideNormal);
+        glm::vec3 radialPoint(circleSideNormal * radius);
+        float step = (2.f * M_PI) / resolution;
+        for (int i = 0; i < resolution; i++) {
+
+            vertexes.push_back(radialPoint.x + position[0]);
+            vertexes.push_back(radialPoint.y + position[1]);
+            vertexes.push_back(radialPoint.z + position[2]);
+            colours.push_back(colour[0]);
+            colours.push_back(colour[1]);
+            colours.push_back(colour[2]);
+            colours.push_back(colour[3]);
+
+
+            radialPoint = glm::rotate(radialPoint, step, circleNormal);
+        }
+
+        for (int i = 0; i < resolution-1; i++) {
+            indexes.push_back(i);
+            indexes.push_back(i + 1);
+        }
+        indexes.push_back(resolution - 1);
+        indexes.push_back(0);
+
+        return buildVAOfromData(vertexes, colours, indexes);
     }
 
 }

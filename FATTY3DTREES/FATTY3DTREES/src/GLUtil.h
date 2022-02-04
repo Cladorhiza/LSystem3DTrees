@@ -3,9 +3,9 @@
 #include "external_code/glm/glm.hpp"
 #include <vector>
 #include "LSystem.h"
+#include "GraphicsTurtle.h"
 namespace GLUtil
 {
-
 	/*function build2DVAOfromData(const std::vector<float>& vertexes,
 								  const std::vector<float>& colours, 
 								  const std::vector<unsigned>& indexes)
@@ -21,5 +21,7 @@ namespace GLUtil
 								const std::vector<float>& colours, 
 								const std::vector<unsigned>& indexes);
 
+	unsigned buildVAOfromData(GraphicsTurtle::renderData& data);
 
+	unsigned buildCircleVAO(const float position[3],const float normal[3], float radius, int resolution, const float colour[4]);
 };
