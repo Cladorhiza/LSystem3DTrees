@@ -56,8 +56,8 @@ int main()
     float yellow[4]{0.8f,0.8f,0.f,1.f};
 
     std::string axiom = "B";
-    std::string rules = "A-AA,B-ACEBDCFBDCGBDHB,C-C,D-D,E-E,F-F,G-G,H-H";
-    std::string turtleRules = "A-F 0.1,B-F 0.05,C-[,D-],E-+ 45,F-- 45,G-& 45,H-^ 45";
+    std::string rules = "A-AA,B-ACEBDFB,C-C,D-D,E-E,F-F";
+    std::string turtleRules = "A-F 0.1,B-F 0.05,C-[,D-],E-+ 45,F-- 45";
     int generation = 1;
         
     std::string rulesAtGeneration = LSystem::CalculateLSystemAtGeneration(axiom, rules, generation);
@@ -68,7 +68,7 @@ int main()
     unsigned vao = GLUtil::buildVAOfromData(data);
     ResourceManager::AddBuffer(vao);
 
-    
+    bool renderCircles = false;
 
     std::vector<unsigned int> circleVaos;
 
@@ -85,9 +85,10 @@ int main()
         shader.SetUniformMat4f("projectionMatrix", projectionMatrix);
         shader.SetUniformMat4f("viewMatrix", viewMatrix);
 
+        
 
-
-
+        if (InputManager::GetKeyToggle(GLFW_KEY_C))
+            renderCircles = !renderCircles;
 
         if (InputManager::GetKeyToggle(GLFW_KEY_W)) {
             generation++;
@@ -97,6 +98,9 @@ int main()
             ResourceManager::RemoveBuffer(vao);
             vao = GLUtil::buildVAOfromData(t);
             ResourceManager::AddBuffer(vao);
+            //for (const auto& v : t.vertexes) {
+            //    std::cout << v.position[0] << " " << v.position[1] << " " << v.position[2] << std::endl;
+            //}
             std::cout << t.vertexes.size() << std::endl;
             
             for (const unsigned int v : circleVaos) {
@@ -109,7 +113,7 @@ int main()
                 float radiusRatio = (t.maximumDistanceFromOrigin - p.distanceFromOrigin) / t.maximumDistanceFromOrigin;
                 if (radiusRatio == 0.0f) 
                     radiusRatio = 0.0001f;
-                float radius = 0.1f * radiusRatio;
+                float radius = 0.05f * radiusRatio;
                 unsigned int v = GLUtil::buildCircleVAO(p.position, p.circleNormal, radius, 10, green);
                 ResourceManager::AddBuffer(v);
                 circleVaos.push_back(v);
@@ -135,11 +139,12 @@ int main()
                 float radiusRatio = (t.maximumDistanceFromOrigin - p.distanceFromOrigin) / t.maximumDistanceFromOrigin;
                 if (radiusRatio == 0.0f) 
                     radiusRatio = 0.0001f;
-                float radius = 0.1f * radiusRatio;
+                float radius = 0.05f * radiusRatio;
                 unsigned int v = GLUtil::buildCircleVAO(p.position, p.circleNormal, radius, 10, green);
                 ResourceManager::AddBuffer(v);
                 circleVaos.push_back(v);
             }
+            std::cout << t.vertexes.size() << std::endl;
 
         }
 
@@ -151,11 +156,12 @@ int main()
         glBindVertexArray(vao);
         glDrawElements(GL_LINES, 10000000, GL_UNSIGNED_INT, 0);
 
-        for (unsigned vao : circleVaos) {
-            glBindVertexArray(vao);
-            glDrawElements(GL_LINES, 20, GL_UNSIGNED_INT, 0);
+        if (renderCircles) {
+            for (unsigned vao : circleVaos) {
+                glBindVertexArray(vao);
+                glDrawElements(GL_LINES, 20, GL_UNSIGNED_INT, 0);
+            }
         }
-
 
 
 

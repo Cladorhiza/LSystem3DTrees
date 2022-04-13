@@ -2,7 +2,7 @@
 #include <iostream>
 
 GraphicsTurtle::GraphicsTurtle()
-	:currentTransformation(1.f),distanceFromOrigin(0.f)
+	:currentTransformation(1.f),distanceFromOrigin(0.f), stackIndex(0), poppedLastInstruction(false)
 	{
 	}
 
@@ -21,13 +21,19 @@ GraphicsTurtle::GraphicsTurtle()
 	void GraphicsTurtle::PushMatrix() {
 		matrixStack.push_back(currentTransformation);
 		distanceFromOriginStack.push_back(distanceFromOrigin);
+		indexOfVertexStack.push_back(stackIndex);
 	}
 	void GraphicsTurtle::PopMatrix() {
-		if (matrixStack.size() > 0 && distanceFromOriginStack.size() > 0) {
+		if (matrixStack.size() > 0 && distanceFromOriginStack.size() > 0 && indexOfVertexStack.size() > 0) {
 			currentTransformation = matrixStack.back();
 			matrixStack.pop_back();
 			distanceFromOrigin = distanceFromOriginStack.back();
 			distanceFromOriginStack.pop_back();
+			stackIndex = indexOfVertexStack.back();
+			indexOfVertexStack.pop_back();
+		}
+		else {
+			printf("WARNING: Attempted to popMatrix in graphicsturtle without sufficient stack data");
 		}
 	}
 
@@ -91,10 +97,9 @@ GraphicsTurtle::GraphicsTurtle()
 		origin.circleNormal[1] = 1.f;
 		origin.circleNormal[2] = 0.f;
 		lSystemRenderData.vertexes.push_back(origin);
-		//tracks current index we are starting our move operation from
-		int indexCount = 0;
 		glm::vec4 newPoint(0.f, 0.f, 0.f, 1.f);
 		glm::vec4 oldPoint(0.f, 0.f, 0.f, 1.f);
+		unsigned int indexCount = 0;
 		//parse every character from rule string into a turtle instruction
 		for (char c : rules) {
 			std::pair<char, float> turtleInstruction = LSystemToTurtleMappings[c];
@@ -102,79 +107,94 @@ GraphicsTurtle::GraphicsTurtle()
 			switch (turtleInstruction.first) {
 			case 'F':
 				MoveForward(turtleInstruction.second, true);
+
+				//apply the new transformation to generate new vertex
+				vertex v;
+				oldPoint = newPoint;
+				newPoint = currentTransformation * glm::vec4(0.f, 0.f, 0.f, 1.f);
+				v.position[0] = newPoint.x;
+				v.position[1] = newPoint.y;
+				v.position[2] = newPoint.z;
+
+				v.colour[0] = 1.f;
+				v.colour[1] = 0.f;
+				v.colour[2] = 0.f;
+				v.colour[3] = 1.f;
+
+				distanceFromOrigin += glm::length(newPoint - oldPoint);
+				if (distanceFromOrigin > lSystemRenderData.maximumDistanceFromOrigin)
+					lSystemRenderData.maximumDistanceFromOrigin = distanceFromOrigin;
+				v.distanceFromOrigin = distanceFromOrigin;
+				glm::vec4 circleNormal(glm::normalize(newPoint - oldPoint));
+				v.circleNormal[0] = circleNormal.x;
+				v.circleNormal[1] = circleNormal.y;
+				v.circleNormal[2] = circleNormal.z;
+
+
+				lSystemRenderData.vertexes.push_back(v);
+				indexCount++;
+				if (poppedLastInstruction) {
+					lSystemRenderData.indexes.push_back(stackIndex);
+					lSystemRenderData.indexes.push_back(indexCount);
+					poppedLastInstruction = false;
+				}
+				else {
+					lSystemRenderData.indexes.push_back(indexCount - 1);
+					lSystemRenderData.indexes.push_back(indexCount);
+				}
+				stackIndex = indexCount;
+
 				break;
 			case 'f':
 				MoveForward(turtleInstruction.second, false);
-				break;
+				continue;
 			case '+':
 				RotateYaw(-turtleInstruction.second);
-				break;
+				continue;
 			case '-':
 				RotateYaw(turtleInstruction.second);
-				break;
+				continue;
 			case '&':
 				RotatePitch(turtleInstruction.second);
-				break;
+				continue;
 			case '^':
 				RotatePitch(-turtleInstruction.second);
-				break;
+				continue;
 			case '\\':
 				RotateRoll(-turtleInstruction.second);
-				break;
+				continue;
 			case '/':
 				RotateRoll(turtleInstruction.second);
-				break;
+				continue;
 			case '|':
 				RotateYaw(180.f);
 				RotatePitch(180.f);
 				RotateRoll(180.f);
-				break;
+				continue;
 			case '[':
 				PushMatrix();
-				break;
+				continue;
 			case ']':
 				PopMatrix();
-				break;
+				poppedLastInstruction = true;
+				continue;
 			}
 
-			//apply the new transformation to generate new vertex
-			vertex v;
-			oldPoint = newPoint;
-			newPoint = currentTransformation * glm::vec4(0.f, 0.f, 0.f, 1.f);
-			v.position[0] = newPoint.x;
-			v.position[1] = newPoint.y;
-			v.position[2] = newPoint.z;
-			v.colour[0] = 1.f;
-			v.colour[1] = 0.f;
-			v.colour[2] = 0.f;
-			v.colour[3] = 1.f;
-			if (turtleInstruction.first != ']' && turtleInstruction.first != '[') {
-				distanceFromOrigin += glm::length(newPoint - oldPoint);
-				if (distanceFromOrigin > lSystemRenderData.maximumDistanceFromOrigin)
-					lSystemRenderData.maximumDistanceFromOrigin = distanceFromOrigin;
-			}
-			v.distanceFromOrigin = distanceFromOrigin;
-			glm::vec4 circleNormal(glm::normalize(newPoint - oldPoint));
-			v.circleNormal[0] = circleNormal.x;
-			v.circleNormal[1] = circleNormal.y;
-			v.circleNormal[2] = circleNormal.z;
-			lSystemRenderData.vertexes.push_back(v);
-			indexCount++;
-			//if it was a pop we don't want to connect old position to new position
-			if (turtleInstruction.first == ']') continue;
-			lSystemRenderData.indexes.push_back(indexCount - 1);
-			lSystemRenderData.indexes.push_back(indexCount);
+
+
+
 		}
-
 		return lSystemRenderData;
 	}
 
 	void GraphicsTurtle::Reset() {
 
 		currentTransformation = glm::mat4(1.f);
-		std::vector<glm::mat4> m;
-		matrixStack = m;
+		matrixStack.clear();
+		distanceFromOriginStack.clear();
 		distanceFromOrigin = 0.f;
+		indexOfVertexStack.clear();
+		stackIndex = 0;
 
 
 	}

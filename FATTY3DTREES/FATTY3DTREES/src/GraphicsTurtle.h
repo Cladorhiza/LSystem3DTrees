@@ -15,8 +15,15 @@ private:
 	std::vector<float> distanceFromOriginStack;
 	//current distance from origin
 	float distanceFromOrigin;
+	//index of point pushed
+	std::vector<unsigned int> indexOfVertexStack;
+	//tracks current index we are starting our move operation from
+	unsigned int stackIndex;
 	//mapped L-system symbols to turtle instructions and magnitudes
 	std::unordered_map<char, std::pair<char, float>> LSystemToTurtleMappings;
+
+	//flag for whether we popped last instruction
+	bool poppedLastInstruction;
 
 public:
 	GraphicsTurtle();
