@@ -55,9 +55,9 @@ int main()
     float green[4]{0.f,0.8f,0.f,1.f};
     float yellow[4]{0.8f,0.8f,0.f,1.f};
 
-    std::string axiom = "B";
-    std::string rules = "A-AA,B-ACEBDFB,C-C,D-D,E-E,F-F";
-    std::string turtleRules = "A-F 0.1,B-F 0.05,C-[,D-],E-+ 45,F-- 45";
+    std::string axiom = "X";
+    std::string rules = "X-FAECCXDBGXDBGFCBGFXDAEX,F-FF,A-A,B-B,C-C,D-D,E-E,G-G";
+    std::string turtleRules = "F-F 0.025,A-+ 25, B-- 25,C-[,D-],E-& 25,G-^ 25";
     int generation = 1;
         
     std::string rulesAtGeneration = LSystem::CalculateLSystemAtGeneration(axiom, rules, generation);

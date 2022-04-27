@@ -177,6 +177,7 @@ GraphicsTurtle::GraphicsTurtle()
 			case ']':
 				PopMatrix();
 				poppedLastInstruction = true;
+				newPoint = currentTransformation * glm::vec4(0.f, 0.f, 0.f, 1.f);
 				continue;
 			}
 
