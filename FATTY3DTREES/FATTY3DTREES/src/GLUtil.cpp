@@ -72,6 +72,7 @@ namespace GLUtil {
         if (glm::length(circleSideNormal) < 0.001f) 
             circleSideNormal = originSideNormal;
         circleSideNormal = glm::normalize(circleSideNormal);
+
         glm::vec3 radialPoint(circleSideNormal * radius);
         float step = (2.f * M_PI) / resolution;
         for (int i = 0; i < resolution; i++) {
@@ -94,6 +95,91 @@ namespace GLUtil {
         }
         indexes.push_back(resolution - 1);
         indexes.push_back(0);
+
+        return buildVAOfromData(vertexes, colours, indexes);
+    }
+
+    unsigned buildCylinderVAO(const float startPos[3], const float endPos[3], const float startNorm[3], const float endNorm[3], float radius1, float radius2, int resolution, const float colour[4])
+    {
+
+
+
+        std::vector<float> vertexes;
+        std::vector<float> colours;
+        std::vector<unsigned> indexes;
+
+        glm::vec3 originNormal(0.f, 1.f, 0.f);
+        glm::vec3 originSideNormal(1.f, 0.f, 0.f);
+
+        glm::vec3 circleNormal(glm::normalize(glm::vec3(startNorm[0], startNorm[1], startNorm[2])));
+        glm::vec3 circleSideNormal(glm::cross(originNormal, circleNormal));
+
+        if (glm::length(circleSideNormal) < 0.001f)
+            circleSideNormal = originSideNormal;
+        circleSideNormal = glm::normalize(circleSideNormal);
+
+        if (glm::dot(originNormal, circleNormal) < 0) {
+            circleSideNormal = -circleSideNormal;
+        }
+
+        glm::vec3 radialPoint(circleSideNormal * radius1);
+        float step = (2.f * M_PI) / resolution;
+        for (int i = 0; i < resolution; i++) {
+
+            vertexes.push_back(radialPoint.x + startPos[0]);
+            vertexes.push_back(radialPoint.y + startPos[1]);
+            vertexes.push_back(radialPoint.z + startPos[2]);
+            colours.push_back(colour[0]);
+            colours.push_back(colour[1]);
+            colours.push_back(colour[2]);
+            colours.push_back(colour[3]);
+
+
+            radialPoint = glm::rotate(radialPoint, step, circleNormal);
+        }
+        circleNormal = glm::normalize(glm::vec3(endNorm[0], endNorm[1], endNorm[2]));
+        circleSideNormal = glm::cross(originNormal, circleNormal);
+
+        if (glm::length(circleSideNormal) < 0.001f)
+            circleSideNormal = originSideNormal;
+        circleSideNormal = glm::normalize(circleSideNormal);
+
+        if (glm::dot(originNormal, circleNormal) < 0) {
+            circleSideNormal = -circleSideNormal;
+        }
+
+        radialPoint = circleSideNormal * radius2;
+        for (int i = 0; i < resolution; i++) {
+
+            vertexes.push_back(radialPoint.x + endPos[0]);
+            vertexes.push_back(radialPoint.y + endPos[1]);
+            vertexes.push_back(radialPoint.z + endPos[2]);
+            colours.push_back(colour[0]);
+            colours.push_back(colour[1]);
+            colours.push_back(colour[2]);
+            colours.push_back(colour[3]);
+
+
+            radialPoint = glm::rotate(radialPoint, step, circleNormal);
+        }
+
+        
+
+        for (int i = 0; i < resolution - 1; i++) {
+            //push triangles to build quad between two circle edges
+            indexes.push_back(i);
+            indexes.push_back(i + 1);
+            indexes.push_back(resolution + i);
+            indexes.push_back(resolution + i);
+            indexes.push_back(i + 1);
+            indexes.push_back(resolution + i + 1);
+        }
+        indexes.push_back(resolution - 1);
+        indexes.push_back(0);
+        indexes.push_back((resolution * 2) -1);
+        indexes.push_back((resolution * 2) - 1);
+        indexes.push_back(0);
+        indexes.push_back(resolution);
 
         return buildVAOfromData(vertexes, colours, indexes);
     }

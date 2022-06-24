@@ -15,7 +15,7 @@ namespace Camera {
     float zoom = 0.f;
     void Update() {
 
-        zoom = DEFAULT_POSITION.z + InputManager::GetMouseScrollYOffset();
+        zoom = DEFAULT_POSITION.z + InputManager::GetMouseScrollYOffset()/4;
         sensitivity = GetZoomSensitivity();
         if (InputManager::GetKeyState(GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
             glm::vec3 tmp(InputManager::GetDeltaMouseX() * sensitivity, -InputManager::GetDeltaMouseY() * sensitivity, 0.f);

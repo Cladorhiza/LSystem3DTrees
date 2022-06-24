@@ -34,14 +34,13 @@ void main()
 #shader geometry
 #version 330 core
 layout (points) in;
-layout (line_strip, max_vertices = 2) out;
+layout (points, max_vertices = 1) out;
+in vec4 out_Color;
+out vec4 ex_Color;
 
 void main() {    
-    gl_Position = gl_in[0].gl_Position + vec4(-0.1, 0.0, 0.0, 0.0); 
+	ex_Color = out_Color;
+    gl_Position = gl_in[0].gl_Position; 
     EmitVertex();
-
-    gl_Position = gl_in[0].gl_Position + vec4( 0.1, 0.0, 0.0, 0.0);
-    EmitVertex();
-    
     EndPrimitive();
 }  

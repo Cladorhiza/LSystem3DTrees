@@ -15,6 +15,8 @@ private:
 	std::vector<float> distanceFromOriginStack;
 	//current distance from origin
 	float distanceFromOrigin;
+	//current branch count
+	int branchCount;
 	//index of point pushed
 	std::vector<unsigned int> indexOfVertexStack;
 	//tracks current index we are starting our move operation from
@@ -34,6 +36,8 @@ public:
 		float colour[4];
 		float distanceFromOrigin;
 		float circleNormal[3];
+		int branchCount;
+		bool isLeaf;
 	};
 
 	struct renderData {

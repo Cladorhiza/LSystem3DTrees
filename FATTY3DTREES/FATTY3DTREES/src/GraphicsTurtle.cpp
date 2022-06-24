@@ -2,7 +2,7 @@
 #include <iostream>
 
 GraphicsTurtle::GraphicsTurtle()
-	:currentTransformation(1.f),distanceFromOrigin(0.f), stackIndex(0), poppedLastInstruction(false)
+	:currentTransformation(1.f),distanceFromOrigin(0.f), stackIndex(0), poppedLastInstruction(false), branchCount(0)
 	{
 	}
 
@@ -22,6 +22,7 @@ GraphicsTurtle::GraphicsTurtle()
 		matrixStack.push_back(currentTransformation);
 		distanceFromOriginStack.push_back(distanceFromOrigin);
 		indexOfVertexStack.push_back(stackIndex);
+		branchCount++;
 	}
 	void GraphicsTurtle::PopMatrix() {
 		if (matrixStack.size() > 0 && distanceFromOriginStack.size() > 0 && indexOfVertexStack.size() > 0) {
@@ -31,6 +32,7 @@ GraphicsTurtle::GraphicsTurtle()
 			distanceFromOriginStack.pop_back();
 			stackIndex = indexOfVertexStack.back();
 			indexOfVertexStack.pop_back();
+			branchCount--;
 		}
 		else {
 			printf("WARNING: Attempted to popMatrix in graphicsturtle without sufficient stack data");
@@ -93,9 +95,11 @@ GraphicsTurtle::GraphicsTurtle()
 		origin.colour[2] = 0.f;
 		origin.colour[3] = 1.f;
 		origin.distanceFromOrigin = distanceFromOrigin;
+		origin.branchCount = 0;
 		origin.circleNormal[0] = 0.f;
 		origin.circleNormal[1] = 1.f;
 		origin.circleNormal[2] = 0.f;
+		origin.isLeaf = false;
 		lSystemRenderData.vertexes.push_back(origin);
 		glm::vec4 newPoint(0.f, 0.f, 0.f, 1.f);
 		glm::vec4 oldPoint(0.f, 0.f, 0.f, 1.f);
@@ -104,12 +108,12 @@ GraphicsTurtle::GraphicsTurtle()
 		for (char c : rules) {
 			std::pair<char, float> turtleInstruction = LSystemToTurtleMappings[c];
 
+			vertex v;
 			switch (turtleInstruction.first) {
 			case 'F':
 				MoveForward(turtleInstruction.second, true);
 
 				//apply the new transformation to generate new vertex
-				vertex v;
 				oldPoint = newPoint;
 				newPoint = currentTransformation * glm::vec4(0.f, 0.f, 0.f, 1.f);
 				v.position[0] = newPoint.x;
@@ -129,13 +133,16 @@ GraphicsTurtle::GraphicsTurtle()
 				v.circleNormal[0] = circleNormal.x;
 				v.circleNormal[1] = circleNormal.y;
 				v.circleNormal[2] = circleNormal.z;
+				v.isLeaf = false;
 
+				v.branchCount = branchCount;
 
 				lSystemRenderData.vertexes.push_back(v);
 				indexCount++;
 				if (poppedLastInstruction) {
 					lSystemRenderData.indexes.push_back(stackIndex);
 					lSystemRenderData.indexes.push_back(indexCount);
+
 					poppedLastInstruction = false;
 				}
 				else {
@@ -176,15 +183,17 @@ GraphicsTurtle::GraphicsTurtle()
 				continue;
 			case ']':
 				PopMatrix();
-				poppedLastInstruction = true;
 				newPoint = currentTransformation * glm::vec4(0.f, 0.f, 0.f, 1.f);
+				if (!poppedLastInstruction) {
+					lSystemRenderData.vertexes.back().isLeaf = true;
+				}
+				poppedLastInstruction = true;
 				continue;
 			}
-
-
-
-
+			
 		}
+		//set last point to leaf as there is no pop command at end of string
+		lSystemRenderData.vertexes.back().isLeaf = true;
 		return lSystemRenderData;
 	}
 
@@ -196,6 +205,7 @@ GraphicsTurtle::GraphicsTurtle()
 		distanceFromOrigin = 0.f;
 		indexOfVertexStack.clear();
 		stackIndex = 0;
+		poppedLastInstruction = false;
 
 
 	}

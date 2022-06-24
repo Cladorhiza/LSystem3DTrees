@@ -11,6 +11,7 @@ namespace InputManager{
 		GLFW_KEY_L,
 		GLFW_KEY_K,
 		GLFW_KEY_C,
+		GLFW_KEY_X,
 		GLFW_KEY_ESCAPE
 	};
 	//stored state of keys

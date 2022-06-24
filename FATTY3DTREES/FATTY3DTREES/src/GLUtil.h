@@ -24,4 +24,6 @@ namespace GLUtil
 	unsigned buildVAOfromData(GraphicsTurtle::renderData& data);
 
 	unsigned buildCircleVAO(const float position[3],const float normal[3], float radius, int resolution, const float colour[4]);
+
+	unsigned buildCylinderVAO(const float startPos[3], const float endPos[3], const float startNorm[3], const float endNorm[3], float radius1, float radius2, int resolution, const float colour[4]);
 };
