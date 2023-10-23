@@ -57,16 +57,15 @@ int main()
     float yellow[4]{0.8f,0.8f,0.f,1.f};
     float brown[4]{0.8f,0.2f,0.2f,1.f};
 
-    std::string axiom = "X";
-    std::string rules = "X-FAECXDCBGXDBGFCBGFXDAEX,F-FF,A-A,B-B,C-C,D-D,E-E,G-G";
-    std::string turtleRules = "F-F 0.025,A-+ 25, B-- 25,C-[,D-],E-& 25,G-^ 25";
+	std::string axiom = "B";
+	std::string rules = "A-AA,B-ACEBDFB,C-C,D-D,E-E,F-F";
+	std::string turtleRules = "A-F 0.001,B-F 0.0005,C-[,D-],E-+ 45,F-- 45";
     int generation = 1;
-
     float maxBranchRadius = 0.05f;
     float minBranchRadius = 0.01f;
-        
+
     std::string rulesAtGeneration = LSystem::CalculateLSystemAtGeneration(axiom, rules, generation);
-        
+    
     GraphicsTurtle turtle;
     turtle.BuildLSystemToTurtleMappings(turtleRules);
     GraphicsTurtle::renderData data = turtle.GenerateGeometryOfLSystemRuleString(rulesAtGeneration);
@@ -105,12 +104,13 @@ int main()
         if (InputManager::GetKeyToggle(GLFW_KEY_W)) {
             generation++;
             rulesAtGeneration = LSystem::CalculateLSystemAtGeneration(axiom, rules, generation);
+            //std::cout << "L-System at generation: " << generation << ": " << rulesAtGeneration << std::endl;
             turtle.Reset();
             GraphicsTurtle::renderData t = turtle.GenerateGeometryOfLSystemRuleString(rulesAtGeneration);
             ResourceManager::RemoveBuffer(vao);
             vao = GLUtil::buildVAOfromData(t);
             ResourceManager::AddBuffer(vao);
-            std::cout << t.vertexes.size() << std::endl;
+            //std::cout << t.vertexes.size() << std::endl;
             
             for (const unsigned int v : circleVaos) {
                 ResourceManager::RemoveBuffer(v);

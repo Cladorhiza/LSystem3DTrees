@@ -40,6 +40,7 @@ public:
 		bool isLeaf;
 	};
 
+	//graphics information
 	struct renderData {
 		std::vector<vertex> vertexes;
 		std::vector<unsigned> indexes;

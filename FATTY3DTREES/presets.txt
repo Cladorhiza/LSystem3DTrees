@@ -23,8 +23,26 @@ std::string axiom = "X";
 std::string rules = "X-FACAAXDCBXDBBFCBFXDAX,F-FF,A-A,B-B,C-C,D-D";
 std::string turtleRules = "F-F 0.025,A-+ 15, B-- 15,C-[,D-]";
 
-with skew
+Realistic tree with skew
 
 std::string axiom = "X";
 std::string rules = "X-FAECXDCBGXDBGFCBGFXDAEX,F-FF,A-A,B-B,C-C,D-D,E-E,G-G";
 std::string turtleRules = "F-F 0.025,A-+ 25, B-- 25,C-[,D-],E-& 25,G-^ 25";
+
+another tree 2d
+
+std::string axiom = "X";
+std::string rules = "X-FABXCFADXCBX,F-FF,A-A,B-B,C-C,D-D";
+std::string turtleRules = "F-F 0.025,A-[, B-+ 20,C-],D-- 20";
+
+another one
+
+std::string axiom = "X";
+std::string rules = "X-FABXCADXCFX,F-FF,A-A,B-B,C-C,D-D";
+std::string turtleRules = "F-F 0.025,A-[, B-+ 25.7,C-],D-- 25.7";
+
+another one
+
+std::string axiom = "F";
+std::string rules = "F-FFDADFBFBFCBABFDFDFC,A-A,B-B,C-C,D-D";
+std::string turtleRules = "F-F 0.025,A-[, B-+ 22.5,C-],D-- 22.5";

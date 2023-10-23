@@ -1,11 +1,13 @@
 #include "Camera.h"
 
+#include "InputManager.h"
+
 namespace Camera {
 
-    const glm::vec3 DEFAULT_DIRECTION(0.f, 0.f, -1.f);
-    const glm::vec3 ORIGIN(0.f, 0.f, 0.f);
-    const glm::vec3 DEFAULT_POSITION(0.f, 0.f, -50.f);
-    const float DEFAULT_SENSITIVITY = 0.05f;
+    constexpr glm::vec3 DEFAULT_DIRECTION(0.f, 0.f, -1.f);
+    constexpr glm::vec3 ORIGIN(0.f, 0.f, 0.f);
+    constexpr glm::vec3 DEFAULT_POSITION(0.f, 0.f, -50.f);
+    constexpr float DEFAULT_SENSITIVITY = 0.05f;
     glm::mat4 viewMatrix(1.f);
     glm::vec3 yawAxis(0.f, 1.f, 0.f);
     float dx = 0.f;
