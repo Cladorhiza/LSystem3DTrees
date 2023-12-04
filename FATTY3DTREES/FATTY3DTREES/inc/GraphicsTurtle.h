@@ -1,6 +1,6 @@
 #pragma once
-#include "external_code/glm/glm.hpp"
-#include "external_code/glm/gtc/matrix_transform.hpp"
+#include "glm.hpp"
+#include "gtc/matrix_transform.hpp"
 #include <vector>
 #include <unordered_map>
 #include <sstream>

@@ -1,6 +1,6 @@
 #pragma once
 #include "GL/glew.h"
-#include "external_code/glm/glm.hpp"
+#include "glm.hpp"
 #include <vector>
 #include "LSystem.h"
 #include "GraphicsTurtle.h"

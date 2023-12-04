@@ -1,7 +1,7 @@
 #include "GLUtil.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
-#include "external_code/glm/gtx/rotate_vector.hpp"
+#include "gtx/rotate_vector.hpp"
 
 namespace GLUtil {
 

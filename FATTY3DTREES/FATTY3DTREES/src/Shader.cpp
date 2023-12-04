@@ -1,7 +1,7 @@
 #include "Shader.h"
 #include <GL/glew.h>
 
-#include "external_code/glm/gtc/type_ptr.hpp"
+#include "gtc/type_ptr.hpp"
 
 Shader::Shader(const std::string& filepath)
 	: filePath(filepath), rendererID(0)
