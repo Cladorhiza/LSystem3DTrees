@@ -56,7 +56,7 @@ int Init(){
     glClearColor(0.0f, 0.0f, 0.0f, 1.f);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    //glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
 
     return 1;
 }
@@ -102,7 +102,7 @@ int main()
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(g_window))
     {
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         //INPUT
         InputManager::Poll(g_window);
