@@ -74,7 +74,7 @@ namespace GLUtil {
         circleSideNormal = glm::normalize(circleSideNormal);
 
         glm::vec3 radialPoint(circleSideNormal * radius);
-        float step = (2.f * M_PI) / resolution;
+        float step = (2.f * static_cast<float>(M_PI)) / resolution;
         for (int i = 0; i < resolution; i++) {
 
             vertexes.push_back(radialPoint.x + position[0]);
@@ -123,7 +123,7 @@ namespace GLUtil {
         }
 
         glm::vec3 radialPoint(circleSideNormal * radius1);
-        float step = (2.f * M_PI) / resolution;
+        float step = (2.f * static_cast<float>(M_PI)) / resolution;
         for (int i = 0; i < resolution; i++) {
 
             vertexes.push_back(radialPoint.x + startPos[0]);

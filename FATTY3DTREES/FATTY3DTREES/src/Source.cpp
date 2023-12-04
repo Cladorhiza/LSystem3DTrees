@@ -1,16 +1,22 @@
 //gl
 #include "GL/glew.h"
 #include "GLUtil.h"
+#include "gl/GL.h"
 //glfw
 #include "GLFW/glfw3.h"
-#include "InputManager.h"
+//imgui
+#include "imgui.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_glfw.h"
 
+//app
+#include "InputManager.h"
 #include "Shader.h"
 #include "LSystem.h"
 #include "GraphicsTurtle.h"
 #include "Camera.h"
 #include "ResourceManager.h"
-
+//stl
 #include <iostream>
 #include <vector>
 #include <utility>
@@ -57,6 +63,20 @@ int Init(){
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glEnable(GL_DEPTH_TEST);
+
+    //imgui
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+    ImGui::StyleColorsDark();
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForOpenGL(g_window, true);
+    const char* glsl_version = "#version 150";
+    ImGui_ImplOpenGL3_Init(glsl_version);
 
     return 1;
 }
@@ -109,6 +129,11 @@ int main()
         //~INPUT
 
         //LOGIC
+
+        if (InputManager::GetKeyState(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+            ResourceManager::Clear();
+            break;
+        }
 
         //camera
         if (InputManager::GetKeyState(GLFW_KEY_Q) ==     GLFW_PRESS) mainCamera.Translate(-mainCamera.GetUp() * cameraSpeed);
@@ -198,10 +223,22 @@ int main()
 
         }
 
-        if (InputManager::GetKeyState(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-            ResourceManager::Clear();
-            break;
-        }
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        ImGui::Begin("Light Settings");
+        //ImGui::SliderFloat3("Light WorldPosition", &lightPosition.x, -1000.0f, 1000.0f);
+		//shader.SetUniformvec3f("lightWorldPosition", lightPosition.x, lightPosition.y, lightPosition.z);
+        //ImGui::ColorEdit3("Ambient Intensity", &shader.lightInfo.ambientIntensity.x);            
+        //framerate
+        //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+        ImGui::End();
+        
+
+        ImGui::Render();
+
         //~LOGIC
 
 
@@ -216,6 +253,10 @@ int main()
                 glDrawElements(GL_TRIANGLES, 60, GL_UNSIGNED_INT, 0);
             }
         }
+
+        //draw UI over everything else
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
         //~RENDER
 
         glfwSwapBuffers(g_window);
