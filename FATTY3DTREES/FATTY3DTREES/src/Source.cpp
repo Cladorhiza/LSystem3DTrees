@@ -16,47 +16,66 @@
 #include <utility>
 #include <sstream>
 
+#define WIDTH 1280
+#define HEIGHT 720
 
+GLFWwindow* g_window;
 
-int main()
-{
-    GLFWwindow* window;
+constexpr float red[4]{0.8f,0.f,0.f,1.f};
+constexpr float blue[4]{0.f,0.f,0.8f,1.f};
+constexpr float green[4]{0.f,0.8f,0.f,1.f};
+constexpr float yellow[4]{0.8f,0.8f,0.f,1.f};
+constexpr float brown[4]{0.8f,0.2f,0.2f,1.f};
+
+int Init(){
 
     /* Initialize the library */
     if (!glfwInit())
         return -1;
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(1280, 720, "fatty 3 d trees", NULL, NULL);
-    if (!window)
+    g_window = glfwCreateWindow(WIDTH, HEIGHT, "fatty 3 d trees", NULL, NULL);
+    if (!g_window)
     {
         glfwTerminate();
         return -1;
     }
 
     /* Make the window's context current */
-    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(g_window);
+    glfwSwapInterval(0);
 
     GLenum err = glewInit();
     if (GLEW_OK != err)
     {
         std::cout << "gl broke" << std::endl;
     }
-    InputManager::Init(window);
+    InputManager::Init(g_window);
 
-    glViewport(0, 0, 1280, 720);
-    glClearColor(0.f, 0.0f, 0.0f, 1.f);
+    glViewport(0, 0, WIDTH, HEIGHT);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.f);
     glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    //glEnable(GL_DEPTH_TEST);
 
-    glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.f), 16.f / 9.f, 0.f, 100.f);
-    glm::mat4 viewMatrix = Camera::GetViewMatrix();
+    return 1;
+}
+
+int main()
+{
+    if (Init() == -1) {
+        std::cout << "Error initialising the program! aborting.\n";
+        return -1;
+    }
+
+    Camera mainCamera;
+    mainCamera.SetPosition(glm::vec3{0.0f, 0.0f, 1.0f});
+    float cameraSpeed { 0.001f };
+    float cameraRotationSpeed { 0.05f};
+
+    glm::mat4 projectionMatrix { glm::perspective(glm::radians(45.f), static_cast<float>(WIDTH) / HEIGHT, 0.1f, 100.f) };
+    glm::mat4 viewMatrix { mainCamera.GetViewMatrix() };
     
-    float red[4]{0.8f,0.f,0.f,1.f};
-    float blue[4]{0.f,0.f,0.8f,1.f};
-    float green[4]{0.f,0.8f,0.f,1.f};
-    float yellow[4]{0.8f,0.8f,0.f,1.f};
-    float brown[4]{0.8f,0.2f,0.2f,1.f};
-
 	std::string axiom = "B";
 	std::string rules = "A-AA,B-ACEBDFB,C-C,D-D,E-E,F-F";
 	std::string turtleRules = "A-F 0.001,B-F 0.0005,C-[,D-],E-+ 45,F-- 45";
@@ -81,13 +100,29 @@ int main()
     shader.Bind();
     bool useGeoShader = false;
     /* Loop until the user closes the window */
-    while (!glfwWindowShouldClose(window))
+    while (!glfwWindowShouldClose(g_window))
     {
-        /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
+        
+        //INPUT
+        InputManager::Poll(g_window);
+        //~INPUT
 
-        Camera::Update();
-        viewMatrix = Camera::GetViewMatrix();
+        //LOGIC
+
+        //camera
+        if (InputManager::GetKeyState(GLFW_KEY_Q) ==     GLFW_PRESS) mainCamera.Translate(-mainCamera.GetUp() * cameraSpeed);
+        if (InputManager::GetKeyState(GLFW_KEY_E) ==     GLFW_PRESS) mainCamera.Translate(mainCamera.GetUp() * cameraSpeed);
+        if (InputManager::GetKeyState(GLFW_KEY_W) ==     GLFW_PRESS) mainCamera.Translate(mainCamera.GetForward() * cameraSpeed);
+        if (InputManager::GetKeyState(GLFW_KEY_A) ==     GLFW_PRESS) mainCamera.Translate(-mainCamera.GetRight() * cameraSpeed);
+        if (InputManager::GetKeyState(GLFW_KEY_S) ==     GLFW_PRESS) mainCamera.Translate(-mainCamera.GetForward() * cameraSpeed);
+        if (InputManager::GetKeyState(GLFW_KEY_D) ==     GLFW_PRESS) mainCamera.Translate(mainCamera.GetRight() * cameraSpeed);
+        if (InputManager::GetKeyState(GLFW_KEY_UP) ==    GLFW_PRESS) mainCamera.Rotate(glm::vec3{cameraRotationSpeed, 0.0f, 0.0f});
+        if (InputManager::GetKeyState(GLFW_KEY_DOWN) ==  GLFW_PRESS) mainCamera.Rotate(glm::vec3{-cameraRotationSpeed, 0.0f, 0.0f});
+        if (InputManager::GetKeyState(GLFW_KEY_LEFT) ==  GLFW_PRESS) mainCamera.Rotate(glm::vec3{0.0f, cameraRotationSpeed, 0.0f});
+        if (InputManager::GetKeyState(GLFW_KEY_RIGHT) == GLFW_PRESS) mainCamera.Rotate(glm::vec3{0.0f, -cameraRotationSpeed, 0.0f});
+
+        viewMatrix = mainCamera.GetViewMatrix();
         shader.SetUniformMat4f("projectionMatrix", projectionMatrix);
         shader.SetUniformMat4f("viewMatrix", viewMatrix);
 
@@ -101,16 +136,16 @@ int main()
             else shader.Bind();
         }
             
-        if (InputManager::GetKeyToggle(GLFW_KEY_W)) {
+        if (InputManager::GetKeyToggle(GLFW_KEY_2)) {
             generation++;
             rulesAtGeneration = LSystem::CalculateLSystemAtGeneration(axiom, rules, generation);
-            //std::cout << "L-System at generation: " << generation << ": " << rulesAtGeneration << std::endl;
+            std::cout << "L-System at generation: " << generation << ": " << rulesAtGeneration << std::endl;
             turtle.Reset();
             GraphicsTurtle::renderData t = turtle.GenerateGeometryOfLSystemRuleString(rulesAtGeneration);
             ResourceManager::RemoveBuffer(vao);
             vao = GLUtil::buildVAOfromData(t);
             ResourceManager::AddBuffer(vao);
-            //std::cout << t.vertexes.size() << std::endl;
+            std::cout << t.vertexes.size() << std::endl;
             
             for (const unsigned int v : circleVaos) {
                 ResourceManager::RemoveBuffer(v);
@@ -135,7 +170,7 @@ int main()
             }
         }
             
-        if (InputManager::GetKeyToggle(GLFW_KEY_S)) {
+        if (InputManager::GetKeyToggle(GLFW_KEY_1)) {
             if (generation > 0) generation--;
             rulesAtGeneration = LSystem::CalculateLSystemAtGeneration(axiom, rules, generation);
             turtle.Reset();
@@ -167,7 +202,11 @@ int main()
             ResourceManager::Clear();
             break;
         }
+        //~LOGIC
 
+
+
+        //RENDER
         glBindVertexArray(vao);
         glDrawElements(GL_LINES, 10000000, GL_UNSIGNED_INT, 0);
 
@@ -177,15 +216,9 @@ int main()
                 glDrawElements(GL_TRIANGLES, 60, GL_UNSIGNED_INT, 0);
             }
         }
+        //~RENDER
 
-
-
-
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
-
-        /* Poll for and process events */
-        InputManager::Poll(window);
+        glfwSwapBuffers(g_window);
     }
     
     glfwTerminate();
