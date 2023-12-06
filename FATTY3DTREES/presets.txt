@@ -46,3 +46,9 @@ another one
 std::string axiom = "F";
 std::string rules = "F-FFDADFBFBFCBABFDFDFC,A-A,B-B,C-C,D-D";
 std::string turtleRules = "F-F 0.025,A-[, B-+ 22.5,C-],D-- 22.5";
+
+Quadratic Koch island
+
+std::string axiom = "ABABABA";
+std::string rules = "A-ABDCAABABAABADBAACDBAACACAACADCAAA,D-DDDDDD,B-B,C-C";
+std::string turtleRules = "A-F 0.02,B-+ 90,C-- 90,D-f 0.02";

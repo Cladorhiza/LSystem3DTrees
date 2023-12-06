@@ -25,6 +25,8 @@
 #define WIDTH 1280
 #define HEIGHT 720
 
+//#define DRAW_CIRCLES
+
 GLFWwindow* g_window;
 
 constexpr float red[4]{0.8f,0.f,0.f,1.f};
@@ -93,12 +95,13 @@ int main()
     float cameraSpeed { 0.001f };
     float cameraRotationSpeed { 0.05f};
 
-    glm::mat4 projectionMatrix { glm::perspective(glm::radians(45.f), static_cast<float>(WIDTH) / HEIGHT, 0.1f, 100.f) };
+    glm::mat4 projectionMatrix { glm::perspective(glm::radians(45.f), static_cast<float>(WIDTH) / HEIGHT, 0.1f, 1000.f) };
     glm::mat4 viewMatrix { mainCamera.GetViewMatrix() };
     
-	std::string axiom = "B";
-	std::string rules = "A-AA,B-ACEBDFB,C-C,D-D,E-E,F-F";
-	std::string turtleRules = "A-F 0.001,B-F 0.0005,C-[,D-],E-+ 45,F-- 45";
+    std::string axiom = "X";
+    std::string rules = "X-FAECXDCBGXDBGFCBGFXDAEX,F-FF,A-A,B-B,C-C,D-D,E-E,G-G";
+    std::string turtleRules = "F-F 0.025,A-+ 25, B-- 25,C-[,D-],E-& 25,G-^ 25";
+
     int generation = 1;
     float maxBranchRadius = 0.05f;
     float minBranchRadius = 0.01f;
@@ -152,7 +155,7 @@ int main()
         shader.SetUniformMat4f("viewMatrix", viewMatrix);
 
         
-
+#ifdef DRAW_CIRCLES
         if (InputManager::GetKeyToggle(GLFW_KEY_C))
             renderCircles = !renderCircles;
         if (InputManager::GetKeyToggle(GLFW_KEY_X)) {
@@ -160,7 +163,7 @@ int main()
             if (useGeoShader) shader2.Bind();
             else shader.Bind();
         }
-            
+#endif
         if (InputManager::GetKeyToggle(GLFW_KEY_2)) {
             generation++;
             rulesAtGeneration = LSystem::CalculateLSystemAtGeneration(axiom, rules, generation);
@@ -172,6 +175,7 @@ int main()
             ResourceManager::AddBuffer(vao);
             std::cout << t.vertexes.size() << std::endl;
             
+#ifdef DRAW_CIRCLES
             for (const unsigned int v : circleVaos) {
                 ResourceManager::RemoveBuffer(v);
             }
@@ -193,6 +197,7 @@ int main()
                 ResourceManager::AddBuffer(v);
                 circleVaos.push_back(v);
             }
+#endif
         }
             
         if (InputManager::GetKeyToggle(GLFW_KEY_1)) {
@@ -203,7 +208,7 @@ int main()
             ResourceManager::RemoveBuffer(vao);
             vao = GLUtil::buildVAOfromData(t);
             ResourceManager::AddBuffer(vao);
-
+#ifdef DRAW_CIRCLES
             for (const unsigned int v : circleVaos) {
                 ResourceManager::RemoveBuffer(v);
             }
@@ -220,7 +225,7 @@ int main()
                 circleVaos.push_back(v);
             }
             std::cout << t.vertexes.size() << std::endl;
-
+#endif
         }
 
         // Start the Dear ImGui frame
@@ -247,13 +252,14 @@ int main()
         glBindVertexArray(vao);
         glDrawElements(GL_LINES, 10000000, GL_UNSIGNED_INT, 0);
 
+#ifdef DRAW_CIRCLES
         if (renderCircles) {
             for (unsigned vao : circleVaos) {
                 glBindVertexArray(vao);
                 glDrawElements(GL_TRIANGLES, 60, GL_UNSIGNED_INT, 0);
             }
         }
-
+#endif
         //draw UI over everything else
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

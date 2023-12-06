@@ -113,47 +113,81 @@ GraphicsTurtle::GraphicsTurtle()
 			case 'F':
 				MoveForward(turtleInstruction.second, true);
 
-				//apply the new transformation to generate new vertex
-				oldPoint = newPoint;
-				newPoint = currentTransformation * glm::vec4(0.f, 0.f, 0.f, 1.f);
-				v.position[0] = newPoint.x;
-				v.position[1] = newPoint.y;
-				v.position[2] = newPoint.z;
+				{
+					//apply the new transformation to generate new vertex
+					oldPoint = newPoint;
+					newPoint = currentTransformation * glm::vec4(0.f, 0.f, 0.f, 1.f);
+					v.position[0] = newPoint.x;
+					v.position[1] = newPoint.y;
+					v.position[2] = newPoint.z;
 
-				v.colour[0] = 1.f;
-				v.colour[1] = 0.f;
-				v.colour[2] = 0.f;
-				v.colour[3] = 1.f;
+					v.colour[0] = 1.f;
+					v.colour[1] = 0.f;
+					v.colour[2] = 0.f;
+					v.colour[3] = 1.f;
 
-				distanceFromOrigin += glm::length(newPoint - oldPoint);
-				if (distanceFromOrigin > lSystemRenderData.maximumDistanceFromOrigin)
-					lSystemRenderData.maximumDistanceFromOrigin = distanceFromOrigin;
-				v.distanceFromOrigin = distanceFromOrigin;
-				glm::vec4 circleNormal(glm::normalize(newPoint - oldPoint));
-				v.circleNormal[0] = circleNormal.x;
-				v.circleNormal[1] = circleNormal.y;
-				v.circleNormal[2] = circleNormal.z;
-				v.isLeaf = false;
+					distanceFromOrigin += glm::length(newPoint - oldPoint);
+					if (distanceFromOrigin > lSystemRenderData.maximumDistanceFromOrigin)
+						lSystemRenderData.maximumDistanceFromOrigin = distanceFromOrigin;
+					v.distanceFromOrigin = distanceFromOrigin;
+					glm::vec4 circleNormal(glm::normalize(newPoint - oldPoint));
+					v.circleNormal[0] = circleNormal.x;
+					v.circleNormal[1] = circleNormal.y;
+					v.circleNormal[2] = circleNormal.z;
+					v.isLeaf = false;
 
-				v.branchCount = branchCount;
+					v.branchCount = branchCount;
 
-				lSystemRenderData.vertexes.push_back(v);
-				indexCount++;
-				if (poppedLastInstruction) {
-					lSystemRenderData.indexes.push_back(stackIndex);
-					lSystemRenderData.indexes.push_back(indexCount);
+					lSystemRenderData.vertexes.push_back(v);
+					indexCount++;
+					if (poppedLastInstruction) {
+						lSystemRenderData.indexes.push_back(stackIndex);
+						lSystemRenderData.indexes.push_back(indexCount);
 
-					poppedLastInstruction = false;
+						poppedLastInstruction = false;
+					}
+					else {
+						lSystemRenderData.indexes.push_back(indexCount - 1);
+						lSystemRenderData.indexes.push_back(indexCount);
+					}
+					stackIndex = indexCount;
 				}
-				else {
-					lSystemRenderData.indexes.push_back(indexCount - 1);
-					lSystemRenderData.indexes.push_back(indexCount);
-				}
-				stackIndex = indexCount;
 
-				break;
+				continue;
 			case 'f':
 				MoveForward(turtleInstruction.second, false);
+
+				{
+					//apply the new transformation to generate new vertex
+					oldPoint = newPoint;
+					newPoint = currentTransformation * glm::vec4(0.f, 0.f, 0.f, 1.f);
+					v.position[0] = newPoint.x;
+					v.position[1] = newPoint.y;
+					v.position[2] = newPoint.z;
+
+					v.colour[0] = 1.f;
+					v.colour[1] = 0.f;
+					v.colour[2] = 0.f;
+					v.colour[3] = 1.f;
+
+					distanceFromOrigin += glm::length(newPoint - oldPoint);
+					if (distanceFromOrigin > lSystemRenderData.maximumDistanceFromOrigin)
+						lSystemRenderData.maximumDistanceFromOrigin = distanceFromOrigin;
+					v.distanceFromOrigin = distanceFromOrigin;
+					glm::vec4 circleNormal(glm::normalize(newPoint - oldPoint));
+					v.circleNormal[0] = circleNormal.x;
+					v.circleNormal[1] = circleNormal.y;
+					v.circleNormal[2] = circleNormal.z;
+					v.isLeaf = false;
+
+					v.branchCount = branchCount;
+
+					lSystemRenderData.vertexes.push_back(v);
+					indexCount++;
+					stackIndex = indexCount;
+				}
+
+
 				continue;
 			case '+':
 				RotateYaw(-turtleInstruction.second);
