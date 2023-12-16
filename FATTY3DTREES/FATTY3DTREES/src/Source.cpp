@@ -28,6 +28,8 @@
 #define CLIP_FAR 1000.f
 #define VFOV 70.f
 
+#define WITH_GUI
+
 GLFWwindow* g_window;
 
 constexpr float red[4]{0.8f,0.f,0.f,1.f};
@@ -67,6 +69,7 @@ int Init(){
     glCullFace(GL_BACK);
     glEnable(GL_DEPTH_TEST);
 
+#ifdef WITH_GUI
     //imgui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -80,6 +83,8 @@ int Init(){
     ImGui_ImplGlfw_InitForOpenGL(g_window, true);
     const char* glsl_version = "#version 150";
     ImGui_ImplOpenGL3_Init(glsl_version);
+
+#endif
 
     return 1;
 }
@@ -99,9 +104,9 @@ int main()
     glm::mat4 projectionMatrix { glm::perspective(glm::radians(VFOV), static_cast<float>(WIDTH) / HEIGHT, CLIP_NEAR, CLIP_FAR) };
     glm::mat4 viewMatrix { mainCamera.GetViewMatrix() };
     
-    std::string axiom = "F";
-    std::string rules = "F-FAG,G-FBG,A-A,B-B";
-    std::string turtleRules = "F-F 0.025,G-F 0.025,A-- 90, B-+ 90";
+    std::string axiom = "X";
+    std::string rules = "X-FAECXDCBGXDBGFCBGFXDAEX,F-FF,A-A,B-B,C-C,D-D,E-E,G-G";
+    std::string turtleRules = "F-F 0.025,A-+ 25, B-- 25,C-[,D-],E-& 25,G-^ 25";
 
     int generation = 1;
     float maxBranchRadius = 0.05f;
@@ -112,15 +117,16 @@ int main()
     GraphicsTurtle turtle;
     turtle.BuildLSystemToTurtleMappings(turtleRules);
     GraphicsTurtle::renderData data = turtle.GenerateGeometryOfLSystemRuleString(rulesAtGeneration);
+    turtle.Reset();
     unsigned vao = GLUtil::buildVAOfromData(data);
-    ResourceManager::AddBuffer(vao);
+    ResourceManager::AddVertexArray(vao);
 
     Shader shader("res/shaders/BasicShader.txt");
     shader.Bind();
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(g_window))
     {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
         
         //INPUT
         InputManager::Poll(g_window);
@@ -152,11 +158,11 @@ int main()
         if (InputManager::GetKeyToggle(GLFW_KEY_2)) {
             generation++;
             rulesAtGeneration = LSystem::CalculateLSystemAtGeneration(axiom, rules, generation);
-            turtle.Reset();
             data = turtle.GenerateGeometryOfLSystemRuleString(rulesAtGeneration);
-            ResourceManager::RemoveBuffer(vao);
+            turtle.Reset();
+            ResourceManager::RemoveVertexArray(vao);
             vao = GLUtil::buildVAOfromData(data);
-            ResourceManager::AddBuffer(vao);
+            ResourceManager::AddVertexArray(vao);
             std::cout << "L-System length at generation: " << generation << ": " << data.vertexes.size() << std::endl;
             
         }
@@ -164,15 +170,17 @@ int main()
         if (InputManager::GetKeyToggle(GLFW_KEY_1)) {
             if (generation > 0) generation--;
             rulesAtGeneration = LSystem::CalculateLSystemAtGeneration(axiom, rules, generation);
-            turtle.Reset();
             data = turtle.GenerateGeometryOfLSystemRuleString(rulesAtGeneration);
-            ResourceManager::RemoveBuffer(vao);
+            turtle.Reset();
+            ResourceManager::RemoveVertexArray(vao);
             vao = GLUtil::buildVAOfromData(data);
-            ResourceManager::AddBuffer(vao);
+            ResourceManager::AddVertexArray(vao);
             std::cout << "L-System length at generation: " << generation << ": " << data.vertexes.size() << std::endl;
 
         }
 
+#ifdef WITH_GUI
+        
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -189,18 +197,25 @@ int main()
 
         ImGui::Render();
 
+#endif
+
         //~LOGIC
 
 
 
         //RENDER
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         glBindVertexArray(vao);
         glDrawElements(GL_LINES, data.indexes.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
+#ifdef WITH_GUI
+
         //draw UI over everything else
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+#endif
         //~RENDER
 
         glfwSwapBuffers(g_window);

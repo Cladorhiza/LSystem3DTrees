@@ -163,6 +163,7 @@
     <ClCompile Include="Dependencies\imgui\imgui_tables.cpp" />
     <ClCompile Include="Dependencies\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\glBuffer.cpp" />
+    <ClCompile Include="src\glVertexArray.cpp" />
     <ClCompile Include="src\ResourceManager.cpp" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\GraphicsTurtle.cpp" />
@@ -185,6 +186,7 @@
     <ClInclude Include="inc\Camera.h" />
     <ClInclude Include="inc\glBuffer.h" />
     <ClInclude Include="inc\GLUtil.h" />
+    <ClInclude Include="inc\glVertexArray.h" />
     <ClInclude Include="inc\GraphicsTurtle.h" />
     <ClInclude Include="inc\InputManager.h" />
     <ClInclude Include="inc\LSystem.h" />

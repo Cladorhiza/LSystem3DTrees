@@ -36,6 +36,8 @@ namespace GLUtil {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexes.size() * sizeof(unsigned), indexes.data(), GL_STATIC_DRAW);
 
+
+        glBindVertexArray(0);
         return vao;
     }
 
