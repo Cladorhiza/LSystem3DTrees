@@ -28,8 +28,6 @@
 #define CLIP_FAR 1000.f
 #define VFOV 70.f
 
-#define WITH_GUI
-
 GLFWwindow* g_window;
 
 constexpr float red[4]{0.8f,0.f,0.f,1.f};
@@ -69,7 +67,6 @@ int Init(){
     glCullFace(GL_BACK);
     glEnable(GL_DEPTH_TEST);
 
-#ifdef WITH_GUI
     //imgui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -83,8 +80,6 @@ int Init(){
     ImGui_ImplGlfw_InitForOpenGL(g_window, true);
     const char* glsl_version = "#version 150";
     ImGui_ImplOpenGL3_Init(glsl_version);
-
-#endif
 
     return 1;
 }
@@ -123,6 +118,7 @@ int main()
 
     Shader shader("res/shaders/BasicShader.txt");
     shader.Bind();
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(g_window))
     {
@@ -155,49 +151,26 @@ int main()
         shader.SetUniformMat4f("projectionMatrix", projectionMatrix);
         shader.SetUniformMat4f("viewMatrix", viewMatrix);
 
-        if (InputManager::GetKeyToggle(GLFW_KEY_2)) {
-            generation++;
-            rulesAtGeneration = LSystem::CalculateLSystemAtGeneration(axiom, rules, generation);
-            data = turtle.GenerateGeometryOfLSystemRuleString(rulesAtGeneration);
-            turtle.Reset();
-            ResourceManager::RemoveVertexArray(vao);
-            vao = GLUtil::buildVAOfromData(data);
-            ResourceManager::AddVertexArray(vao);
-            std::cout << "L-System length at generation: " << generation << ": " << data.vertexes.size() << std::endl;
-            
-        }
-            
-        if (InputManager::GetKeyToggle(GLFW_KEY_1)) {
-            if (generation > 0) generation--;
-            rulesAtGeneration = LSystem::CalculateLSystemAtGeneration(axiom, rules, generation);
-            data = turtle.GenerateGeometryOfLSystemRuleString(rulesAtGeneration);
-            turtle.Reset();
-            ResourceManager::RemoveVertexArray(vao);
-            vao = GLUtil::buildVAOfromData(data);
-            ResourceManager::AddVertexArray(vao);
-            std::cout << "L-System length at generation: " << generation << ": " << data.vertexes.size() << std::endl;
-
-        }
-
-#ifdef WITH_GUI
-        
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("Light Settings");
-        //ImGui::SliderFloat3("Light WorldPosition", &lightPosition.x, -1000.0f, 1000.0f);
-		//shader.SetUniformvec3f("lightWorldPosition", lightPosition.x, lightPosition.y, lightPosition.z);
-        //ImGui::ColorEdit3("Ambient Intensity", &shader.lightInfo.ambientIntensity.x);            
-        //framerate
-        //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+        ImGui::Begin("L-System Settings");
+        ImGui::SliderInt("Generation", &generation, 0, 100);
+        if (ImGui::Button("Generate")){
+
+            rulesAtGeneration = LSystem::CalculateLSystemAtGeneration(axiom, rules, generation);
+            data = turtle.GenerateGeometryOfLSystemRuleString(rulesAtGeneration);
+            turtle.Reset();
+            ResourceManager::RemoveVertexArray(vao);
+            vao = GLUtil::buildVAOfromData(data);
+            ResourceManager::AddVertexArray(vao);
+            std::cout << "L-System length at generation: " << generation << ": " << data.vertexes.size() << std::endl;
+
+        }
         ImGui::End();
-        
-
         ImGui::Render();
-
-#endif
 
         //~LOGIC
 
@@ -210,12 +183,9 @@ int main()
         glDrawElements(GL_LINES, data.indexes.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
-#ifdef WITH_GUI
-
         //draw UI over everything else
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-#endif
         //~RENDER
 
         glfwSwapBuffers(g_window);

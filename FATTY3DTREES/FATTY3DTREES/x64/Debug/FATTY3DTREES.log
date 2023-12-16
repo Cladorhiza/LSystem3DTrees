@@ -1,5 +1,3 @@
-﻿  GLUtil.cpp
-  Source.cpp
-C:\Git\LSystem3DTrees\FATTY3DTREES\FATTY3DTREES\src\Source.cpp(210,73): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-  Generating Code...
+﻿  Source.cpp
+C:\Git\LSystem3DTrees\FATTY3DTREES\FATTY3DTREES\src\Source.cpp(181,73): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
   FATTY3DTREES.vcxproj -> C:\Git\LSystem3DTrees\FATTY3DTREES\x64\Debug\FATTY3DTREES.exe
