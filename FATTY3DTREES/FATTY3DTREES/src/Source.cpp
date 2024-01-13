@@ -94,14 +94,14 @@ int main()
     Camera mainCamera;
     mainCamera.SetPosition(glm::vec3{0.0f, 0.0f, 1.0f});
     float cameraSpeed { 0.001f };
-    float cameraRotationSpeed { 0.05f};
+    float cameraRotationSpeed { 0.025f};
 
     glm::mat4 projectionMatrix { glm::perspective(glm::radians(VFOV), static_cast<float>(WIDTH) / HEIGHT, CLIP_NEAR, CLIP_FAR) };
     glm::mat4 viewMatrix { mainCamera.GetViewMatrix() };
     
-    std::string axiom = "X";
-    std::string rules = "X-FAECXDCBGXDBGFCBGFXDAEX,F-FF,A-A,B-B,C-C,D-D,E-E,G-G";
-    std::string turtleRules = "F-F 0.025,A-+ 25, B-- 25,C-[,D-],E-& 25,G-^ 25";
+    std::string axiom = "F";
+std::string rules = "F-FAG,G-FBG,A-A,B-B";
+std::string turtleRules = "F-F 0.025,G-F 0.025,A-- 90, B-+ 90";
 
     int generation = 1;
     float maxBranchRadius = 0.05f;
@@ -118,6 +118,7 @@ int main()
 
     Shader shader("res/shaders/BasicShader.txt");
     shader.Bind();
+    shader.SetUniformMat4f("projectionMatrix", projectionMatrix);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(g_window))
@@ -148,7 +149,6 @@ int main()
         if (InputManager::GetKeyState(GLFW_KEY_RIGHT) == GLFW_PRESS) mainCamera.Rotate(glm::vec3{0.0f, -cameraRotationSpeed, 0.0f});
 
         viewMatrix = mainCamera.GetViewMatrix();
-        shader.SetUniformMat4f("projectionMatrix", projectionMatrix);
         shader.SetUniformMat4f("viewMatrix", viewMatrix);
 
         // Start the Dear ImGui frame
