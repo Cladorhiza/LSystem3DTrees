@@ -99,9 +99,9 @@ int main()
     glm::mat4 projectionMatrix { glm::perspective(glm::radians(VFOV), static_cast<float>(WIDTH) / HEIGHT, CLIP_NEAR, CLIP_FAR) };
     glm::mat4 viewMatrix { mainCamera.GetViewMatrix() };
     
-    std::string axiom = "F";
-std::string rules = "F-FAG,G-FBG,A-A,B-B";
-std::string turtleRules = "F-F 0.025,G-F 0.025,A-- 90, B-+ 90";
+    std::string axiom = "X";
+    std::string rules = "X-FAECXDCBGXDBGFCBGFXDAEX,F-FF,A-A,B-B,C-C,D-D,E-E,G-G";
+    std::string turtleRules = "F-F 0.025,A-+ 25, B-- 25,C-[,D-],E-& 25,G-^ 25";
 
     int generation = 1;
     float maxBranchRadius = 0.05f;
@@ -157,6 +157,107 @@ std::string turtleRules = "F-F 0.025,G-F 0.025,A-- 90, B-+ 90";
         ImGui::NewFrame();
 
         ImGui::Begin("L-System Settings");
+
+        ImGui::SeparatorText("Axiom");
+
+        static char str0[128] = "";
+        ImGui::InputText("Axiom", str0, IM_ARRAYSIZE(str0));
+        
+        ImGui::SeparatorText("Productions");
+        
+        //productions tooltip
+        ImGui::SameLine(); 
+        ImGui::TextDisabled("(?)");
+        if (ImGui::BeginItemTooltip())
+        {
+            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+            ImGui::TextUnformatted(
+                "Productions are Formatted as so:\n"
+                "A-ABB\n"
+                "The LHS of the hyphen will be replaced by the RHS of the hyphen each generation.\n"
+            );
+            ImGui::PopTextWrapPos();
+            ImGui::EndTooltip();
+        }
+
+        static std::vector<char*> rawRules;
+        if (ImGui::Button("ADD RULE")) {
+
+            rawRules.emplace_back();
+            rawRules.back() = new char[128] {"rule"};
+
+        }
+        
+        for (int i{ 0 }; i < static_cast<int>(rawRules.size()); i++) {
+
+            std::string s{ "rule " };
+            s += std::to_string(i);
+            ImGui::InputText(s.c_str(), rawRules[i], 128);
+            ImGui::SameLine();
+            s = "DEL";
+            s += std::to_string(i);
+            if (ImGui::Button(s.c_str())) {
+                delete[] rawRules[i];
+                rawRules.erase(rawRules.begin() + i);
+                i--;
+            }
+        }
+        
+        ImGui::SeparatorText("Turtle Productions");
+        
+        //Turtle productions tooltip
+        ImGui::SameLine(); 
+        ImGui::TextDisabled("(?)");
+        if (ImGui::BeginItemTooltip())
+        {
+            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+            ImGui::TextUnformatted(
+                "Turtle productions are one of these following instructions:\n"
+                "F Move forward a step of length d.\n"
+                "f Move forward a step of length d without drawing a line.\n"
+                "+ Turn left by angle ?, using rotation matrix RU.\n"
+                "? Turn right by angle ?, using rotation matrix RU(-).\n"
+                "& Pitch down by angle ?, using rotation matrix RL.\n"
+                "^ Pitch up by angle ?, using rotation matrix RL(-).\n"
+                "\\ Roll left by angle ?, using rotation matrix RH.\n"
+                "/ Roll right by angle ?, using rotation matrix RH(-).\n"
+                "| Turn around, using rotation matrix RU(180).\n"
+                "[ push matrix\n"
+                "] pop matrix\n"
+                "\nThese instructions are formatted as follows:\n"
+                "X-Y Z\n"
+                "Where X is an L-System symbol, Y is one of the above instructions and Z is a floating point or integer value.\n"
+                "The only exception being [ and ], these are written as X-[ or X-]\n"
+            );
+            ImGui::PopTextWrapPos();
+            ImGui::EndTooltip();
+        }
+
+        static std::vector<char*> rawTurtleRules;
+        if (ImGui::Button("ADD TURTLE RULE")) {
+
+            rawTurtleRules.emplace_back();
+            rawTurtleRules.back() = new char[128] {"turtle rule"};
+
+        }
+        
+        for (int i{ 0 }; i < static_cast<int>(rawTurtleRules.size()); i++) {
+
+            std::string s{ "turtle rule " };
+            s += std::to_string(i);
+            ImGui::InputText(s.c_str(), rawTurtleRules[i], 128);
+            ImGui::SameLine();
+            s = "DELT";
+            s += std::to_string(i);
+            if (ImGui::Button(s.c_str())) {
+                delete[] rawTurtleRules[i];
+                rawTurtleRules.erase(rawTurtleRules.begin() + i);
+                i--;
+            }
+        }
+
+        ImGui::SeparatorText("Generation");
+
         ImGui::SliderInt("Generation", &generation, 0, 100);
         if (ImGui::Button("Generate")){
 
@@ -170,6 +271,7 @@ std::string turtleRules = "F-F 0.025,G-F 0.025,A-- 90, B-+ 90";
 
         }
         ImGui::End();
+        ImGui::ShowDemoWindow();
         ImGui::Render();
 
         //~LOGIC
