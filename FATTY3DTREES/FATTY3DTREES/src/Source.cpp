@@ -101,7 +101,7 @@ int main()
     
     std::string axiom = "X";
     std::string rules = "X-FAECXDCBGXDBGFCBGFXDAEX,F-FF,A-A,B-B,C-C,D-D,E-E,G-G";
-    std::string turtleRules = "F-F 0.025,A-+ 25, B-- 25,C-[,D-],E-& 25,G-^ 25";
+    std::string turtleRules = "F-F 0.025,A-+ 25,B-- 25,C-[,D-],E-& 25,G-^ 25";
 
     int generation = 1;
     float maxBranchRadius = 0.05f;
@@ -160,8 +160,8 @@ int main()
 
         ImGui::SeparatorText("Axiom");
 
-        static char str0[128] = "";
-        ImGui::InputText("Axiom", str0, IM_ARRAYSIZE(str0));
+        static char strAxiom[128] = "";
+        ImGui::InputText("Axiom", strAxiom, IM_ARRAYSIZE(strAxiom));
         
         ImGui::SeparatorText("Productions");
         
@@ -227,7 +227,7 @@ int main()
                 "\nThese instructions are formatted as follows:\n"
                 "X-Y Z\n"
                 "Where X is an L-System symbol, Y is one of the above instructions and Z is a floating point or integer value.\n"
-                "The only exception being [ and ], these are written as X-[ or X-]\n"
+                "The only exception being [, ] and |, these are written as X-[ or X-] or X-|\n"
             );
             ImGui::PopTextWrapPos();
             ImGui::EndTooltip();
@@ -261,9 +261,25 @@ int main()
         ImGui::SliderInt("Generation", &generation, 0, 100);
         if (ImGui::Button("Generate")){
 
+            //set rules to user input
+            rules = "";
+            for (const char* c : rawRules) {
+                rules += std::string{ c };
+                rules += ','; //TODO: pointless comma at end of string
+            }
+            turtleRules = "";
+            for (const char* tr : rawTurtleRules) {
+                turtleRules += std::string{ tr };
+                turtleRules += ',';//TODO: pointless comma at end of string
+            }
+            axiom = std::string{ strAxiom };
+
+
             rulesAtGeneration = LSystem::CalculateLSystemAtGeneration(axiom, rules, generation);
-            data = turtle.GenerateGeometryOfLSystemRuleString(rulesAtGeneration);
             turtle.Reset();
+            turtle.BuildLSystemToTurtleMappings(turtleRules);
+
+            data = turtle.GenerateGeometryOfLSystemRuleString(rulesAtGeneration);
             ResourceManager::RemoveVertexArray(vao);
             vao = GLUtil::buildVAOfromData(data);
             ResourceManager::AddVertexArray(vao);

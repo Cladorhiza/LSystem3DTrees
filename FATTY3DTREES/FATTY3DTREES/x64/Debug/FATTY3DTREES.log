@@ -1,3 +1,5 @@
-﻿  Source.cpp
-E:\Git\LSystem3DTrees\FATTY3DTREES\FATTY3DTREES\src\Source.cpp(285,51): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+﻿  GraphicsTurtle.cpp
+  Source.cpp
+E:\Git\LSystem3DTrees\FATTY3DTREES\FATTY3DTREES\src\Source.cpp(301,51): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+  Generating Code...
   FATTY3DTREES.vcxproj -> E:\Git\LSystem3DTrees\FATTY3DTREES\x64\Debug\FATTY3DTREES.exe

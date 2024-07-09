@@ -43,6 +43,7 @@ GraphicsTurtle::GraphicsTurtle()
 
         std::stringstream ruleStream(turtleRules);
         std::string turtleRuleString;
+		LSystemToTurtleMappings.clear();
 
         while (std::getline(ruleStream, turtleRuleString, ',')) {
             std::stringstream subRule(turtleRuleString);
